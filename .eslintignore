@@ -1,0 +1,4 @@
+scripts/
+temp/
+src/api/
+*.js
