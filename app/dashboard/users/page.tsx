@@ -110,6 +110,7 @@ export default function UsersPage() {
         onFilterChange={handleFilterChange}
         onFilterReset={handleFilterReset}
         onCreateClick={handleCreateClick}
+        onBatchCreateSuccess={() => fetchUsers({ page: 1, ...filters })}
       />
 
       <PersonalUserFormModal

@@ -9,6 +9,7 @@ import {
   LogoutOutlined,
   DashboardOutlined,
   ShopOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { authApi } from "@/lib/auth-api";
 
@@ -66,6 +67,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       key: "/dashboard/categories",
       icon: <AppstoreOutlined />,
       label: "分类管理",
+    },
+    {
+      key: "/dashboard/votings",
+      icon: <BarChartOutlined />,
+      label: "投票管理",
     },
   ];
 

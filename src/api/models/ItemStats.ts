@@ -14,5 +14,9 @@ export type ItemStats = {
     shares?: number;
     topCommentId?: string | null;
     lastCommentAt?: string | null;
+    /**
+     * Total votes for the entire voting
+     */
+    totalVotes?: number;
 };
 

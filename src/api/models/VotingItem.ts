@@ -29,5 +29,13 @@ export type VotingItem = {
      */
     specs?: Record<string, string>;
     readonly stats?: ItemStats;
+    /**
+     * Whether the current user has loved this item (only present when user is authenticated)
+     */
+    readonly isLoved?: boolean;
+    /**
+     * Whether the current user has already commented on this item (only present when user is authenticated)
+     */
+    readonly hasCommented?: boolean;
 };
 

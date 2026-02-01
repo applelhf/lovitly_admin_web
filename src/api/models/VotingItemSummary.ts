@@ -7,7 +7,15 @@ export type VotingItemSummary = {
     name?: string;
     primaryImageUrl?: string;
     stats?: {
+        /**
+         * Number of votes for this item
+         */
+        votes?: number;
         votePercent?: number;
+        /**
+         * Total votes for the entire voting
+         */
+        totalVotes?: number;
     };
 };
 

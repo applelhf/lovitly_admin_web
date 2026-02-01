@@ -9,17 +9,20 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export { BonusRules } from './models/BonusRules';
 export type { Category } from './models/Category';
+export { Creator } from './models/Creator';
 export type { ItemStats } from './models/ItemStats';
 export type { Subcategory } from './models/Subcategory';
 export { Voting } from './models/Voting';
+export { VotingInput } from './models/VotingInput';
 export type { VotingItem } from './models/VotingItem';
 export type { VotingItemSummary } from './models/VotingItemSummary';
 export type { VotingRules } from './models/VotingRules';
 export type { VotingStats } from './models/VotingStats';
-export type { VotingSummary } from './models/VotingSummary';
+export { VotingSummary } from './models/VotingSummary';
 
 export { AdminAuthService } from './services/AdminAuthService';
+export { AdminCommentsService } from './services/AdminCommentsService';
+export { AdminVotingService } from './services/AdminVotingService';
 export { BizUsersService } from './services/BizUsersService';
 export { CategoriesService } from './services/CategoriesService';
 export { PersonalUsersService } from './services/PersonalUsersService';
-export { VotingService } from './services/VotingService';

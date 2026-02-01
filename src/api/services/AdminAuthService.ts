@@ -7,12 +7,12 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class AdminAuthService {
     /**
-     * Register a new admin
+     * Create a new admin (Protected)
      * @param requestBody
-     * @returns any Admin created
+     * @returns any Admin created successfully
      * @throws ApiError
      */
-    public static postApiV1AdminAuthRegister(
+    public static postApiV1AdminAuthCreateAdmin(
         requestBody: {
             email: string;
             password: string;
@@ -20,11 +20,12 @@ export class AdminAuthService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/admin/auth/register',
+            url: '/api/v1/admin/auth/createAdmin',
             body: requestBody,
             mediaType: 'application/json',
             errors: {
-                400: `Invalid input`,
+                400: `Invalid input or admin already exists`,
+                401: `Not authorized`,
             },
         });
     }
