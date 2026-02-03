@@ -10,6 +10,8 @@ import {
     Space,
     Empty,
     Button,
+    Popconfirm,
+    message,
 } from "antd";
 import {
     UserOutlined,
@@ -17,6 +19,7 @@ import {
     ReloadOutlined,
 } from "@ant-design/icons";
 import { votingApi } from "@/lib/voting-api";
+import { AdminCommentsService } from "@/src/api/services/AdminCommentsService";
 import dayjs from "dayjs";
 
 // Comment type
@@ -218,13 +221,35 @@ export default function ItemCommentList({
                                 <div style={{ fontSize: 13 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <p style={{ margin: 0 }}>{comment.content}</p>
-                                        <Button
-                                            size="small"
-                                            type="default"
-                                            onClick={() => onBatchLike && onBatchLike(comment._id)}
-                                        >
-                                            批量点赞
-                                        </Button>
+                                        <Space>
+                                            <Button
+                                                size="small"
+                                                type="default"
+                                                onClick={() => onBatchLike && onBatchLike(comment._id)}
+                                            >
+                                                批量点赞
+                                            </Button>
+                                            <Popconfirm
+                                                title="确定删除这条评论吗?"
+                                                onConfirm={async () => {
+                                                    try {
+                                                        await AdminCommentsService.deleteApiV1AdminComments(comment._id);
+                                                        message.success("删除评论成功");
+                                                        window.location.reload();
+                                                    } catch (error) {
+                                                        console.error("Delete failed:", error);
+                                                        message.error("删除失败");
+                                                    }
+                                                }}
+                                                okText="删除"
+                                                cancelText="取消"
+                                                okButtonProps={{ danger: true }}
+                                            >
+                                                <Button size="small" danger type="link">
+                                                    删除
+                                                </Button>
+                                            </Popconfirm>
+                                        </Space>
                                     </div>
                                     <span style={{ color: "#999", fontSize: 11 }}>
                                         <LikeOutlined /> {comment.likes}
