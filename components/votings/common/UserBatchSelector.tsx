@@ -1,16 +1,18 @@
-"use client";
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Table, Input, Segmented, Avatar, Tag, Space } from "antd";
-import { UserOutlined, SearchOutlined } from "@ant-design/icons";
+import { UserOutlined } from "@ant-design/icons";
 import { PersonalUsersService } from "@/src/api/services/PersonalUsersService";
 import { BizUsersService } from "@/src/api/services/BizUsersService";
+import { AdminVotingService } from "@/src/api/services/AdminVotingService";
 import type { ColumnsType } from "antd/es/table";
 
 interface UserBatchSelectorProps {
     value?: string[];
     onChange?: (selectedKeys: string[]) => void;
     selectionType?: "checkbox" | "radio";
+    votingId?: string; // Optional: if provided, check love status
+    currentItemId?: string; // The item currently being operated on
+    filterMode?: "love" | "comment"; // Logic mode
 }
 
 interface UserData {
@@ -20,9 +22,18 @@ interface UserData {
     email: string;
     avatar: string;
     accountType: string;
+    didLoved?: boolean;
+    didLovedItemId?: string | null;
 }
 
-export default function UserBatchSelector({ value = [], onChange, selectionType = "checkbox" }: UserBatchSelectorProps) {
+export default function UserBatchSelector({
+    value = [],
+    onChange,
+    selectionType = "checkbox",
+    votingId,
+    currentItemId,
+    filterMode = "love",
+}: UserBatchSelectorProps) {
     const [userType, setUserType] = useState<"personal" | "biz">("personal");
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(false);
@@ -58,15 +69,48 @@ export default function UserBatchSelector({ value = [], onChange, selectionType 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const meta = (res as any)?.meta?.pagination;
 
+            // 1. Initial Parse
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const parsedData = rawList.map((u: any) => ({
+            let parsedData: UserData[] = rawList.map((u: any) => ({
                 key: u._id || u.id,
                 id: u._id || u.id,
                 username: u.username,
                 email: u.email,
                 avatar: u.avatar,
                 accountType: u.accountType,
+                didLoved: false,
             }));
+
+            // 2. Check Love Status if votingId is provided
+            if (votingId && parsedData.length > 0) {
+                const userIds = parsedData.map((u) => u.id);
+                try {
+                    const statusRes =
+                        await AdminVotingService.postApiV1AdminVotingsBatchGetUsersLovedStatus({
+                            votingId,
+                            userIds,
+                        });
+
+                    if (statusRes.data) {
+                        const statusMap = new Map(
+                            statusRes.data.map((item) => [item.userId, {
+                                didLoved: item.didLoved,
+                                didLovedItemId: item.didLovedItemId
+                            }])
+                        );
+                        parsedData = parsedData.map((u) => {
+                            const status = statusMap.get(u.id);
+                            return {
+                                ...u,
+                                didLoved: status?.didLoved || false,
+                                didLovedItemId: status?.didLovedItemId || null,
+                            };
+                        });
+                    }
+                } catch (err) {
+                    console.error("Failed to check love status:", err);
+                }
+            }
 
             setData(parsedData);
             if (meta) {
@@ -80,7 +124,7 @@ export default function UserBatchSelector({ value = [], onChange, selectionType 
         } finally {
             setLoading(false);
         }
-    }, [userType, search, pagination.current, pagination.pageSize]);
+    }, [userType, search, pagination.current, pagination.pageSize, votingId]);
 
     useEffect(() => {
         fetchData();
@@ -107,6 +151,20 @@ export default function UserBatchSelector({ value = [], onChange, selectionType 
                 <Space>
                     <Avatar src={record.avatar} icon={<UserOutlined />} />
                     <span>{record.username}</span>
+                    {record.didLoved && (
+                        <>
+                            {filterMode === 'love' ? (
+                                <Tag color="orange">已投票</Tag>
+                            ) : (
+                                // For comment mode, distinguish between current item and others
+                                record.didLovedItemId === currentItemId ? (
+                                    <Tag color="green">已投此项</Tag>
+                                ) : (
+                                    <Tag color="red">已投他项</Tag>
+                                )
+                            )}
+                        </>
+                    )}
                 </Space>
             ),
         },
@@ -129,7 +187,25 @@ export default function UserBatchSelector({ value = [], onChange, selectionType 
                 onChange(selectedRowKeys as string[]);
             }
         },
-        preserveSelectedRowKeys: true, // Critical for cross-page selection
+        preserveSelectedRowKeys: true,
+        getCheckboxProps: (record: UserData) => {
+            let disabled = false;
+            if (filterMode === 'love') {
+                // Love Mode: Disable if already voted (any item)
+                disabled = !!record.didLoved;
+            } else if (filterMode === 'comment') {
+                // Comment Mode: 
+                // Enable if NOT loved (new vote) OR loved THIS item (add comment)
+                // Disable if loved ANOTHER item
+                if (record.didLoved && record.didLovedItemId !== currentItemId) {
+                    disabled = true;
+                }
+            }
+            return {
+                disabled,
+                name: record.username,
+            };
+        },
     };
 
     return (
@@ -137,8 +213,8 @@ export default function UserBatchSelector({ value = [], onChange, selectionType 
             <div className="flex items-center justify-between">
                 <Segmented
                     options={[
-                        { label: '个人用户', value: 'personal' },
-                        { label: '企业用户', value: 'biz' },
+                        { label: "个人用户", value: "personal" },
+                        { label: "企业用户", value: "biz" },
                     ]}
                     value={userType}
                     onChange={(val) => {

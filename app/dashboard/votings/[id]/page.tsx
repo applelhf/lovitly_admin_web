@@ -312,6 +312,9 @@ export default function VotingDetailPage() {
                     <UserBatchSelector
                         value={selectedLoveUsers}
                         onChange={(val) => setSelectedLoveUsers(val)}
+                        votingId={voting._id}
+                        currentItemId={targetItemId || undefined}
+                        filterMode="love"
                     />
                 </div>
             </Modal>
@@ -334,6 +337,9 @@ export default function VotingDetailPage() {
                             selectionType="radio"
                             value={selectedCommentUser}
                             onChange={(val) => setSelectedCommentUser(val)}
+                            votingId={voting._id}
+                            currentItemId={targetItemId || undefined}
+                            filterMode="comment"
                         />
                     </div>
 
@@ -346,7 +352,9 @@ export default function VotingDetailPage() {
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCommentContent(e.target.value)}
                         />
                         <p className="text-xs text-gray-400 mt-1">
-                            提示: 提交时若该用户未点赞，系统将自动为其点赞。若已投其他选项，将报错。
+                            提示: 提交时若该用户未点赞，系统将自动为其点赞。若该用户已对其他选项投票，将报错。
+                            <br />
+                            若用户已在此投票中投过票（无论哪个选项），上方列表将显示为“已投票”并不可选。
                         </p>
                     </div>
                 </div>

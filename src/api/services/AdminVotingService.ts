@@ -225,4 +225,34 @@ export class AdminVotingService {
             },
         });
     }
+    /**
+     * Batch check if users loved a voting (Admin)
+     * @param requestBody
+     * @returns any List of user love status
+     * @throws ApiError
+     */
+    public static postApiV1AdminVotingsBatchGetUsersLovedStatus(
+        requestBody: {
+            votingId: string;
+            userIds: Array<string>;
+        },
+    ): CancelablePromise<{
+        success?: boolean;
+        data?: Array<{
+            userId: string;
+            didLoved: boolean;
+            didLovedItemId?: string | null;
+        }>;
+    }> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/admin/votings/batch-get-users-loved-status',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                400: `Invalid input`,
+                401: `Not authorized`,
+            },
+        });
+    }
 }
