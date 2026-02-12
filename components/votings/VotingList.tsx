@@ -53,7 +53,12 @@ export default function VotingList({
     };
 
     const handleFilterReset = () => {
-        onFetch({ page: 1 });
+        onFetch({
+            page: 1,
+            search: "",
+            status: "",
+            categoryMain: "",
+        });
     };
 
     const handlePageChange = (page: number, pageSize: number) => {

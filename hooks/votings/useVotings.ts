@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { votingApi } from "@/lib/voting-api";
 import { VotingWithId } from "@/lib/types";
 import { message } from "antd";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 export interface GetVotingsParams {
     page?: number;
@@ -12,6 +13,8 @@ export interface GetVotingsParams {
     categorySub?: string;
     sort?: string;
     isActive?: boolean;
+    search?: string;
+    status?: string;
 }
 
 interface UseVotingsResult {
@@ -24,25 +27,43 @@ interface UseVotingsResult {
     };
     fetchVotings: (params?: GetVotingsParams) => Promise<void>;
     deleteVoting: (id: string) => Promise<void>;
+    updateUrlParams: (params?: GetVotingsParams) => void;
 }
 
 export function useVotings(): UseVotingsResult {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
     const [votings, setVotings] = useState<VotingWithId[]>([]);
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 10,
+        current: Number(searchParams.get("page")) || 1,
+        pageSize: Number(searchParams.get("limit")) || 10,
         total: 0,
     });
 
     const fetchVotings = useCallback(async (params: GetVotingsParams = {}) => {
         setLoading(true);
         try {
-            const response = await votingApi.getVotings({
-                page: params.page || 1,
-                limit: params.limit || 10,
-                ...params,
-            });
+            const page = params.page || Number(searchParams.get("page")) || 1;
+            const limit = params.limit || Number(searchParams.get("limit")) || 10;
+            const categoryMain = params.categoryMain || searchParams.get("categoryMain") || undefined;
+            const categorySub = params.categorySub || searchParams.get("categorySub") || undefined;
+            const sort = params.sort || searchParams.get("sort") || undefined;
+            const isActive = params.isActive !== undefined ? params.isActive : (searchParams.get("isActive") === "true" ? true : undefined);
+
+            // Filter out params not supported by votingApi
+            const apiParams = {
+                page,
+                limit,
+                categoryMain,
+                categorySub,
+                sort,
+                isActive,
+            };
+
+            const response = await votingApi.getVotings(apiParams);
             // Backend returns _id, swagger uses id - cast to VotingWithId for frontend use
             setVotings((response.data || []) as VotingWithId[]);
             setPagination({
@@ -56,7 +77,31 @@ export function useVotings(): UseVotingsResult {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [searchParams]);
+
+    const updateUrlParams = useCallback((params: GetVotingsParams = {}) => {
+        const urlParams = new URLSearchParams(searchParams.toString());
+
+        if (params.page) urlParams.set("page", params.page.toString());
+        urlParams.delete("limit"); // Always remove limit from URL to keep it clean (default 10)
+
+        if (params.categoryMain) urlParams.set("categoryMain", params.categoryMain);
+        else if (params.categoryMain === "") urlParams.delete("categoryMain");
+
+        if (params.categorySub) urlParams.set("categorySub", params.categorySub);
+        else if (params.categorySub === "") urlParams.delete("categorySub");
+
+        if (params.sort) urlParams.set("sort", params.sort);
+        if (params.isActive !== undefined) urlParams.set("isActive", params.isActive.toString());
+
+        if (params.search) urlParams.set("search", params.search);
+        else if (params.search === "") urlParams.delete("search");
+
+        if (params.status) urlParams.set("status", params.status);
+        else if (params.status === "") urlParams.delete("status");
+
+        router.push(`${pathname}?${urlParams.toString()}`);
+    }, [searchParams, pathname, router]);
 
     const deleteVoting = useCallback(
         async (id: string) => {
@@ -82,5 +127,6 @@ export function useVotings(): UseVotingsResult {
         pagination,
         fetchVotings,
         deleteVoting,
+        updateUrlParams,
     };
 }

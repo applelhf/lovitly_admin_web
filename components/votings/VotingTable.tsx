@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Table, Button, Space, Image, Tag, Tooltip } from "antd";
+import { Table, Button, Space, Image, Tag, Tooltip, Popconfirm } from "antd";
 import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { VotingWithId } from "@/lib/types";
@@ -151,13 +151,29 @@ export default function VotingTable({
                     >
                         查看
                     </Button>
-                    <Button
+                    {/* <Button
                         type="link"
                         icon={<EditOutlined />}
                         onClick={() => onEdit(record)}
                     >
                         编辑
-                    </Button>
+                    </Button> */}
+                    <Popconfirm
+                        title="确定删除这个投票吗?"
+                        description="删除后无法恢复，且会同步删除相关的统计数据。"
+                        onConfirm={() => onDelete(record._id)}
+                        okText="删除"
+                        cancelText="取消"
+                        okButtonProps={{ danger: true }}
+                    >
+                        <Button
+                            type="link"
+                            danger
+                            icon={<DeleteOutlined />}
+                        >
+                            删除
+                        </Button>
+                    </Popconfirm>
                 </Space>
             ),
         },
