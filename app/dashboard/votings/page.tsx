@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import VotingList from "@/components/votings/VotingList";
 import { useVotings } from "@/hooks/votings/useVotings";
 
-export default function VotingsPage() {
+function VotingsContent() {
     const { votings, loading, pagination, fetchVotings, deleteVoting, updateUrlParams } =
         useVotings();
 
@@ -18,5 +18,13 @@ export default function VotingsPage() {
                 onDelete={deleteVoting}
             />
         </div>
+    );
+}
+
+export default function VotingsPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <VotingsContent />
+        </Suspense>
     );
 }
