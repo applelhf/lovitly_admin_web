@@ -64,6 +64,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       label: "商家用户",
     },
     {
+      key: "/dashboard/aiUsers",
+      icon: <UserOutlined />,
+      label: "AI 员工",
+    },
+    {
       key: "/dashboard/categories",
       icon: <AppstoreOutlined />,
       label: "分类管理",

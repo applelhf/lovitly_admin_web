@@ -239,8 +239,8 @@ export class AdminVotingService {
     ): CancelablePromise<{
         success?: boolean;
         data?: Array<{
-            userId: string;
-            didLoved: boolean;
+            userId?: string;
+            didLoved?: boolean;
             didLovedItemId?: string | null;
         }>;
     }> {

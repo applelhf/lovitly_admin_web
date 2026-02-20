@@ -22,7 +22,9 @@ export { VotingSummary } from './models/VotingSummary';
 
 export { AdminAuthService } from './services/AdminAuthService';
 export { AdminCommentsService } from './services/AdminCommentsService';
+export { AdminUploadService } from './services/AdminUploadService';
 export { AdminVotingService } from './services/AdminVotingService';
+export { AiUsersService } from './services/AiUsersService';
 export { BizUsersService } from './services/BizUsersService';
 export { CategoriesService } from './services/CategoriesService';
 export { PersonalUsersService } from './services/PersonalUsersService';
